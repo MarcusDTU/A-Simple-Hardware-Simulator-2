@@ -192,7 +192,9 @@ class Circuit extends AST{
     Integer n = null;
 
         for(Trace i: siminputs){
-
+            if(i.values.length == 0){
+                error("Invalid input length");
+            }
         if(n == null){
             n = i.values.length;
         } else if(n != i.values.length){
