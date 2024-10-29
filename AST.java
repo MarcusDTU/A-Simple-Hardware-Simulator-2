@@ -173,7 +173,7 @@ class Circuit extends AST{
 
     public void latchesUpdate(Environment env){
         for(String l: latches){
-            env.setVariable(env.getVariable(l+"'"), l);
+            env.setVariable(l+"'", env.getVariable(l));
         }
     }
 }
