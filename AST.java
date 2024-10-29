@@ -123,8 +123,8 @@ class Trace extends AST{
 
     public String toString(){
         StringBuilder res = new StringBuilder();
-        for(int i = 0; i < values.length; i++){
-            res.append(values[i] ? "1" : "0");
+        for (Boolean value : values) {
+            res.append(value ? "1" : "0");
         }
         res.append(" = ").append(signal);
         return res.toString();
