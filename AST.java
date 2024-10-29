@@ -17,24 +17,38 @@ public abstract class AST{
    (Negation). Moreover, an expression can be using any of the
    functions defined in the definitions. */
 
-abstract class Expr extends AST{}
+abstract class Expr extends AST{
+    abstract public Boolean eval(Environment env);
+}
 
 class Conjunction extends Expr{
     // Example: Signal1 * Signal2 
     Expr e1,e2;
     Conjunction(Expr e1,Expr e2){this.e1=e1; this.e2=e2;}
+
+    public Boolean eval(Environment env){
+    return e1.eval(env) && e2.eval(env);
+    }
 }
 
 class Disjunction extends Expr{
     // Example: Signal1 + Signal2 
     Expr e1,e2;
     Disjunction(Expr e1,Expr e2){this.e1=e1; this.e2=e2;}
+
+    public Boolean eval(Environment env){
+    return e1.eval(env) || e2.eval(env);
+    }
 }
 
 class Negation extends Expr{
     // Example: /Signal
     Expr e;
     Negation(Expr e){this.e=e;}
+
+    public Boolean eval(Environment env){
+    return !e.eval(env);
+    }
 }
 
 class UseDef extends Expr{
@@ -45,11 +59,20 @@ class UseDef extends Expr{
     UseDef(String f, List<Expr> args){
 	this.f=f; this.args=args;
     }
+
+    public Boolean eval(Environment env){
+    error("Not implemented yet");
+    return null;
+    }
 }
 
 class Signal extends Expr{
     String varname; // a signal is just identified by a name 
     Signal(String varname){this.varname=varname;}
+
+    public Boolean eval(Environment env){
+    return env.getVariable(varname);
+    }
 }
 
 class Def extends AST{
@@ -61,6 +84,11 @@ class Def extends AST{
     Def(String f, List<String> args, Expr e){
 	this.f=f; this.args=args; this.e=e;
     }
+
+    public Boolean eval(Environment env){
+    error("Not implemented yet");
+    return null;
+    }
 }
 
 // An Update is any of the lines " signal = expression "
@@ -71,6 +99,10 @@ class Update extends AST{
     String name;  // Signal being updated, e.g. "Signal1"
     Expr e;  // The value it receives, e.g., "/Signal2"
     Update(String name, Expr e){this.e=e; this.name=name;}
+
+    public void eval(Environment env){
+    env.setVariable(name,e.eval(env));
+    }
 }
 
 /* A Trace is a signal and an array of Booleans, for instance each
