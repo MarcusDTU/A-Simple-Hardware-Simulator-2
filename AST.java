@@ -149,7 +149,6 @@ class Circuit extends AST{
     List<Update> updates;
     List<Trace>  siminputs;
     List<Trace>  simoutputs;
-    int simlength;
     Circuit(String name,
 	    List<String> inputs,
 	    List<String> outputs,
@@ -164,5 +163,11 @@ class Circuit extends AST{
 	this.definitions=definitions;
 	this.updates=updates;
 	this.siminputs=siminputs;
+    }
+
+    public void latchesInit(Environment env){
+        for(String l: latches){
+            env.setVariable(l+"'", false);
+        }
     }
 }
