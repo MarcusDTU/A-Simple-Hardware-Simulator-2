@@ -186,4 +186,27 @@ class Circuit extends AST{
             env.setVariable(l+"'", env.getVariable(l));
         }
     }
+
+    public void initialize(Environment env){
+
+    Integer n = null;
+
+        for(Trace i: siminputs){
+
+        if(n == null){
+            n = i.values.length;
+        } else if(n != i.values.length){
+            error("Invalid input length");
+          }
+            env.setVariable(i.signal, i.values[0]);
+
+            for(int j = 0; j < i.values.length; j++){
+                if(i.values[j] == null){
+                    error("Invalid input value");
+                }
+            }
+        }
+
+        latchesInit(env);
+    }
 }
