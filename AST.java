@@ -120,6 +120,16 @@ class Trace extends AST{
 	this.signal=signal;
 	this.values=values;
     }
+
+    public String toString(){
+        String res = "";
+        for(int i = 0; i < values.length; i++){
+            res += values[i] ? "1" : "0";
+        }
+        res = res + " = " + signal;
+        return res;
+    }
+
 }
 
 /* The main data structure of this simulator: the entire circuit with
