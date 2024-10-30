@@ -3,10 +3,10 @@ import java.util.Map.Entry;
 import java.util.List;
 import java.util.ArrayList;
 
-public abstract class AST{
-    public void error(String msg){
-	System.err.println(msg);
-	System.exit(-1);
+public abstract class AST {
+    public void error(String msg) {
+        System.err.println(msg);
+        System.exit(-1);
     }
 };
 
@@ -17,91 +17,114 @@ public abstract class AST{
    (Negation). Moreover, an expression can be using any of the
    functions defined in the definitions. */
 
-abstract class Expr extends AST{
+abstract class Expr extends AST {
     abstract public Boolean eval(Environment env);
 }
 
-class Conjunction extends Expr{
+class Conjunction extends Expr {
     // Example: Signal1 * Signal2 
-    Expr e1,e2;
-    Conjunction(Expr e1,Expr e2){this.e1=e1; this.e2=e2;}
+    Expr e1, e2;
 
-    public Boolean eval(Environment env){
-    return e1.eval(env) && e2.eval(env);
+    Conjunction(Expr e1, Expr e2) {
+        this.e1 = e1;
+        this.e2 = e2;
+    }
+
+    public Boolean eval(Environment env) {
+        return e1.eval(env) && e2.eval(env);
     }
 }
 
-class Disjunction extends Expr{
+class Disjunction extends Expr {
     // Example: Signal1 + Signal2 
-    Expr e1,e2;
-    Disjunction(Expr e1,Expr e2){this.e1=e1; this.e2=e2;}
+    Expr e1, e2;
 
-    public Boolean eval(Environment env){
-    return e1.eval(env) || e2.eval(env);
+    Disjunction(Expr e1, Expr e2) {
+        this.e1 = e1;
+        this.e2 = e2;
+    }
+
+    public Boolean eval(Environment env) {
+        return e1.eval(env) || e2.eval(env);
     }
 }
 
-class Negation extends Expr{
+class Negation extends Expr {
     // Example: /Signal
     Expr e;
-    Negation(Expr e){this.e=e;}
 
-    public Boolean eval(Environment env){
-    return !e.eval(env);
+    Negation(Expr e) {
+        this.e = e;
+    }
+
+    public Boolean eval(Environment env) {
+        return !e.eval(env);
     }
 }
 
-class UseDef extends Expr{
+class UseDef extends Expr {
     // Using any of the functions defined by "def"
     // e.g. xor(Signal1,/Signal2) 
     String f;  // the name of the function, e.g. "xor" 
     List<Expr> args;  // arguments, e.g. [Signal1, /Signal2]
-    UseDef(String f, List<Expr> args){
-	this.f=f; this.args=args;
+
+    UseDef(String f, List<Expr> args) {
+        this.f = f;
+        this.args = args;
     }
 
-    public Boolean eval(Environment env){
-    error("Not implemented yet");
-    return null;
+    public Boolean eval(Environment env) {
+        error("Not implemented yet");
+        return null;
     }
 }
 
-class Signal extends Expr{
+class Signal extends Expr {
     String varname; // a signal is just identified by a name 
-    Signal(String varname){this.varname=varname;}
 
-    public Boolean eval(Environment env){
-    return env.getVariable(varname);
+    Signal(String varname) {
+        this.varname = varname;
+    }
+
+    public Boolean eval(Environment env) {
+        return env.getVariable(varname);
     }
 }
 
-class Def extends AST{
+class Def extends AST {
     // Definition of a function
     // Example: def xor(A,B) = A * /B + /A * B
     String f; // function name, e.g. "xor"
     List<String> args;  // formal arguments, e.g. [A,B]
     Expr e;  // body of the definition, e.g. A * /B + /A * B
-    Def(String f, List<String> args, Expr e){
-	this.f=f; this.args=args; this.e=e;
+
+    Def(String f, List<String> args, Expr e) {
+        this.f = f;
+        this.args = args;
+        this.e = e;
     }
 
-    public Boolean eval(Environment env){
-    error("Not implemented yet");
-    return null;
+    public Boolean eval(Environment env) {
+        error("Not implemented yet");
+        return null;
     }
 }
 
 // An Update is any of the lines " signal = expression "
 // in the update section
 
-class Update extends AST{
+class Update extends AST {
     // Example Signal1 = /Signal2 
     String name;  // Signal being updated, e.g. "Signal1"
     Expr e;  // The value it receives, e.g., "/Signal2"
-    Update(String name, Expr e){this.e=e; this.name=name;}
 
-    public void eval(Environment env){
-    env.setVariable(name,e.eval(env));
+    Update(String name, Expr e) {
+        this.e = e;
+        this.name = name;
+    }
+
+    public void eval(Environment env) {
+        env.setVariable(name, e.eval(env));
     }
 }
 
@@ -112,16 +135,17 @@ class Update extends AST{
    assignment.
 */
 
-class Trace extends AST{
+class Trace extends AST {
     // Example Signal = 0101010
     String signal;
     Boolean[] values;
-    Trace(String signal, Boolean[] values){
-	this.signal=signal;
-	this.values=values;
+
+    Trace(String signal, Boolean[] values) {
+        this.signal = signal;
+        this.values = values;
     }
 
-    public String toString(){
+    public String toString() {
         StringBuilder res = new StringBuilder();
         for (Boolean value : values) {
             res.append(value ? "1" : "0");
@@ -150,60 +174,61 @@ class Trace extends AST{
    traces should also finally have the length simlength.
 */
 
-class Circuit extends AST{
-    String name;  
-    List<String> inputs; 
+class Circuit extends AST {
+    String name;
+    List<String> inputs;
     List<String> outputs;
-    List<String>  latches;
+    List<String> latches;
     List<Def> definitions;
     List<Update> updates;
-    List<Trace>  siminputs;
-    List<Trace>  simoutputs;
+    List<Trace> siminputs;
+    List<Trace> simoutputs;
+
     Circuit(String name,
-	    List<String> inputs,
-	    List<String> outputs,
-	    List<String>  latches,
-	    List<Def> definitions,
-	    List<Update> updates,
-	    List<Trace>  siminputs){
-	this.name=name;
-	this.inputs=inputs;
-	this.outputs=outputs;
-	this.latches=latches;
-	this.definitions=definitions;
-	this.updates=updates;
-	this.siminputs=siminputs;
+            List<String> inputs,
+            List<String> outputs,
+            List<String> latches,
+            List<Def> definitions,
+            List<Update> updates,
+            List<Trace> siminputs) {
+        this.name = name;
+        this.inputs = inputs;
+        this.outputs = outputs;
+        this.latches = latches;
+        this.definitions = definitions;
+        this.updates = updates;
+        this.siminputs = siminputs;
     }
 
-    public void latchesInit(Environment env){
-        for(String l: latches){
-            env.setVariable(l+"'", false);
+    public void latchesInit(Environment env) {
+        for (String l : latches) {
+            env.setVariable(l + "'", false);
         }
     }
 
-    public void latchesUpdate(Environment env){
-        for(String l: latches){
-            env.setVariable(l+"'", env.getVariable(l));
+    public void latchesUpdate(Environment env) {
+        for (String l : latches) {
+            env.setVariable(l + "'", env.getVariable(l));
         }
     }
 
-    public void initialize(Environment env){
+    public void initialize(Environment env) {
 
-    Integer n = null;
+        Integer n = null;
 
-        for(Trace i: siminputs){
-            if(i.values.length == 0){
+        for (Trace i : siminputs) {
+            if (i.values.length == 0) {
                 error("Invalid input length");
             }
-        if(n == null){
-            n = i.values.length;
-        } else if(n != i.values.length){
-            error("Invalid input length");
-          }
+            if (n == null) {
+                n = i.values.length;
+            } else if (n != i.values.length) {
+                error("Invalid input length");
+            }
             env.setVariable(i.signal, i.values[0]);
 
-            for(int j = 0; j < i.values.length; j++){
-                if(i.values[j] == null){
+            for (int j = 0; j < i.values.length; j++) {
+                if (i.values[j] == null) {
                     error("Invalid input value");
                 }
             }
