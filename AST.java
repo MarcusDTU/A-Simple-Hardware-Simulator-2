@@ -2,6 +2,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.List;
 import java.util.ArrayList;
+import java.io.*;
 
 public abstract class AST {
     public void error(String msg) {
@@ -216,6 +217,12 @@ class Circuit extends AST {
 
         Integer n = null;
 
+        /*
+        Read the input value of every input signal at time point 0 from the siminputs and make an
+        entry into the Environment. This thus initializes all input signals. This method stops with
+        an error if the siminput is not defined for any input signal, or its array has length 0.
+        */
+
         for (Trace i : siminputs) {
             if (i.values.length == 0) {
                 error("Invalid input length");
@@ -225,15 +232,67 @@ class Circuit extends AST {
             } else if (n != i.values.length) {
                 error("Invalid input length");
             }
-            env.setVariable(i.signal, i.values[0]);
 
             for (int j = 0; j < i.values.length; j++) {
                 if (i.values[j] == null) {
                     error("Invalid input value");
                 }
             }
+
+            env.setVariable(i.signal, i.values[0]);
         }
 
+        //Call the latchesInit method to initialize all outputs of latches.
         latchesInit(env);
+
+
+        //Run the eval method of every Update to initialize all remaining signals.
+        for (Update update : updates) {
+            update.eval(env);
+        }
+
+        //Print the environment on the screen (note it has a toString method), so one can see the
+        //value of all variables.
+        System.out.println(env);
     }
+
+    public void nextCycle(Environment env, int i) {
+
+        //It should read the input value of every input signal at time point i from the siminputs and
+        //make an entry into the environment. Again, this errors if the i-th entry in the siminput is not
+        //defined.
+        for (Trace inputs : siminputs) {
+            for (int j = 0; j < inputs.values.length; j++) {
+                if (inputs.values[j] == null) {
+                    error("Invalid input value");
+                }
+            }
+            env.setVariable(inputs.signal, inputs.values[i]);
+        }
+
+        //Call the latchesUpdate method to update all outputs of latches.
+        latchesUpdate(env);
+
+        //Run the eval method of every Update to update all remaining signals.
+        for (Update update : updates) {
+            update.eval(env);
+        }
+
+        //Print the environment on the screen (note it has a toString method), so one can see the
+        //value of all variables.
+        System.out.println(env);
+    }
+
+    public void runSimulator() {
+        //runs initialize
+        Environment env = new Environment();
+        initialize(env);
+
+        //then run n times nextCycle where n is the
+        //length of the simulator inputs. You may here assume that all siminputs have the same length.
+        for (int i = 1; i < siminputs.size(); i++) {
+            nextCycle(env, i);
+        }
+    }
+
 }
