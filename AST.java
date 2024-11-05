@@ -253,7 +253,7 @@ class Circuit extends AST {
 
         //Print the environment on the screen (note it has a toString method), so one can see the
         //value of all variables.
-        System.out.println(env);
+        //System.out.println(env);
     }
 
     public void nextCycle(Environment env, int i) {
@@ -280,31 +280,34 @@ class Circuit extends AST {
 
         //Print the environment on the screen (note it has a toString method), so one can see the
         //value of all variables.
-        System.out.println(env);
+        //System.out.println(env);
     }
 
-    /*public void captureOutput(Environment env) {
-        for (String output : outputs) {
+    public void captureOutput(Environment env) {
+        int simLength = siminputs.get(0).values.length;
+        simoutputs = new ArrayList<>();
+        simoutputs.addAll(siminputs);
 
+        for (String output : outputs) {
+            Boolean[] values = new Boolean[simLength];
+            for (int i = 0; i < simLength; i++) {
+                nextCycle(env, i);
+                values[i] = env.getVariable(output);
+            }
+            simoutputs.add(new Trace(output, values));
         }
-    }*/
+    }
 
     public void runSimulator() {
         //runs initialize
         Environment env = new Environment(this.definitions);
         initialize(env);
 
-        //then run n times nextCycle where n is the
-        //length of the simulator inputs. You may here assume that all siminputs have the same length.
-        for (int i = 1; i < siminputs.get(0).values.length; i++) {
-            nextCycle(env, i);
+        captureOutput(env);
+
+        for (Trace simoutput : simoutputs) {
+            System.out.println(simoutput);
         }
-
-        //captureOutput(env);
-
-        /*for (Trace t : simoutputs) {
-            System.out.println(simoutputs);
-        }*/
     }
 
 }
