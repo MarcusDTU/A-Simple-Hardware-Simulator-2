@@ -75,8 +75,13 @@ class UseDef extends Expr {
     }
 
     public Boolean eval(Environment env) {
-        error("Not implemented yet");
-        return null;
+        Def def = env.getDef(f);
+
+        Environment nenv = new Environment(env);
+        for (int i = 0; i < args.size(); i++) {
+            nenv.setVariable(def.args.get(i), args.get(i).eval(env));
+        }
+        return def.e.eval(nenv);
     }
 }
 
@@ -103,11 +108,6 @@ class Def extends AST {
         this.f = f;
         this.args = args;
         this.e = e;
-    }
-
-    public Boolean eval(Environment env) {
-        error("Not implemented yet");
-        return null;
     }
 }
 
@@ -285,12 +285,12 @@ class Circuit extends AST {
 
     public void runSimulator() {
         //runs initialize
-        Environment env = new Environment();
+        Environment env = new Environment(this.definitions);
         initialize(env);
 
         //then run n times nextCycle where n is the
         //length of the simulator inputs. You may here assume that all siminputs have the same length.
-        for (int i = 1; i < siminputs.size(); i++) {
+        for (int i = 1; i < siminputs.get(0).values.length; i++) {
             nextCycle(env, i);
         }
     }
