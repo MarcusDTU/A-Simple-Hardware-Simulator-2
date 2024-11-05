@@ -283,6 +283,12 @@ class Circuit extends AST {
         System.out.println(env);
     }
 
+    /*public void captureOutput(Environment env) {
+        for (String output : outputs) {
+
+        }
+    }*/
+
     public void runSimulator() {
         //runs initialize
         Environment env = new Environment(this.definitions);
@@ -293,6 +299,12 @@ class Circuit extends AST {
         for (int i = 1; i < siminputs.get(0).values.length; i++) {
             nextCycle(env, i);
         }
+
+        //captureOutput(env);
+
+        /*for (Trace t : simoutputs) {
+            System.out.println(simoutputs);
+        }*/
     }
 
 }
