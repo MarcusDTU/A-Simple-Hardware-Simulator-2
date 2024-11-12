@@ -151,7 +151,7 @@ class Trace extends AST {
         for (Boolean value : values) {
             res.append(value ? "1" : "0");
         }
-        res.append(" = ").append(signal);
+        res.append(" ").append(signal);
         return res.toString();
     }
 
@@ -199,6 +199,14 @@ class Circuit extends AST {
         this.definitions = definitions;
         this.updates = updates;
         this.siminputs = siminputs;
+        this.simoutputs = new ArrayList<>();
+        int simLength = siminputs.get(0).values.length;
+
+        for (String output : outputs) {
+            Boolean[] values = new Boolean[simLength];
+            simoutputs.add(new Trace(output, values));
+        }
+
     }
 
     public void latchesInit(Environment env) {
@@ -283,18 +291,9 @@ class Circuit extends AST {
         //System.out.println(env);
     }
 
-    public void captureOutput(Environment env) {
-        int simLength = siminputs.get(0).values.length;
-        simoutputs = new ArrayList<>();
-        simoutputs.addAll(siminputs);
-
-        for (String output : outputs) {
-            Boolean[] values = new Boolean[simLength];
-            for (int i = 0; i < simLength; i++) {
-                nextCycle(env, i);
-                values[i] = env.getVariable(output);
-            }
-            simoutputs.add(new Trace(output, values));
+    public void captureOutput(Environment env, int cycle) {
+        for (Trace simoutput : simoutputs) {
+            simoutput.values[cycle] = env.getVariable(simoutput.signal);
         }
     }
 
@@ -302,8 +301,16 @@ class Circuit extends AST {
         //runs initialize
         Environment env = new Environment(this.definitions);
         initialize(env);
+        captureOutput(env, 0);
 
-        captureOutput(env);
+        for (int i = 1; i < siminputs.get(0).values.length; i++) {
+            nextCycle(env, i);
+            captureOutput(env, i);
+        }
+
+        for (Trace siminput : siminputs) {
+            System.out.println(siminput);
+        }
 
         for (Trace simoutput : simoutputs) {
             System.out.println(simoutput);
